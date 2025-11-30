@@ -1,0 +1,72 @@
+[project]
+name = "yfinance-pl"
+version = "0.1.1"
+description = "Python wrapper for yfinance-rs using PyO3 and Polars"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "rmc8" }
+]
+keywords = [
+    "yahoo-finance",
+    "stock",
+    "market",
+    "finance",
+    "polars",
+    "dataframe",
+    "yfinance",
+    "trading",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Rust",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "polars>=1.35.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/rmc8/yfinance-pl"
+Documentation = "https://rmc8.github.io/yfinance-pl/"
+Repository = "https://github.com/rmc8/yfinance-pl"
+Issues = "https://github.com/rmc8/yfinance-pl/issues"
+
+[dependency-groups]
+dev = [
+    "maturin>=1.10.2",
+    "ruff>=0.14.7",
+]
+docs = [
+    "sphinx>=7.0",
+    "pydata-sphinx-theme>=0.15",
+    "sphinx-copybutton>=0.5",
+]
+
+[build-system]
+requires = ["maturin>=1.10.2"]
+build-backend = "maturin"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+python-source = "python"
+module-name = "yfinance_pl._yfinance_pl"
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
