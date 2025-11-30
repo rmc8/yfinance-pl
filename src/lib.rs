@@ -15,6 +15,32 @@ fn to_py_err<E: std::fmt::Display>(e: E) -> PyErr {
     PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string())
 }
 
+/// Convert 'ts' column (i64 milliseconds) to 'date' column (Datetime type)
+fn convert_ts_to_date(df: DataFrame) -> PolarsResult<DataFrame> {
+    if let Ok(ts_col) = df.column("ts") {
+        // Cast ts column to Datetime
+        let date_col = ts_col
+            .cast(&DataType::Datetime(TimeUnit::Milliseconds, None))?
+            .with_name("date".into());
+
+        // Drop ts column and add date column
+        let mut df = df.drop("ts")?;
+        df.with_column(date_col)?;
+        Ok(df)
+    } else {
+        Ok(df)
+    }
+}
+
+/// Convert i64 timestamps (seconds) to a Datetime Series
+fn timestamps_to_datetime_series_sec(timestamps: &[i64], name: &str) -> Series {
+    // Convert seconds to milliseconds
+    let timestamps_ms: Vec<i64> = timestamps.iter().map(|ts| ts * 1000).collect();
+    Series::new(name.into(), timestamps_ms)
+        .cast(&DataType::Datetime(TimeUnit::Milliseconds, None))
+        .unwrap()
+}
+
 fn parse_range(period: &str) -> Range {
     match period {
         "1d" => Range::D1,
@@ -106,6 +132,7 @@ impl Ticker {
 
             let candles = builder.fetch().await.map_err(to_py_err)?;
             let df = candles.to_dataframe().map_err(to_py_err)?;
+            let df = convert_ts_to_date(df).map_err(to_py_err)?;
             Ok(PyDataFrame(df))
         })
     }
@@ -251,7 +278,7 @@ impl Ticker {
             let amounts: Vec<f64> = divs.iter().map(|(_, amt)| *amt).collect();
 
             let df = DataFrame::new(vec![
-                Series::new("date".into(), timestamps).into(),
+                timestamps_to_datetime_series_sec(&timestamps, "date").into(),
                 Series::new("dividends".into(), amounts).into(),
             ])
             .map_err(to_py_err)?;
@@ -278,7 +305,7 @@ impl Ticker {
                 .collect();
 
             let df = DataFrame::new(vec![
-                Series::new("date".into(), timestamps).into(),
+                timestamps_to_datetime_series_sec(&timestamps, "date").into(),
                 Series::new("stock_splits".into(), ratios).into(),
             ])
             .map_err(to_py_err)?;
@@ -323,7 +350,7 @@ impl Ticker {
             }
 
             let df = DataFrame::new(vec![
-                Series::new("date".into(), timestamps).into(),
+                timestamps_to_datetime_series_sec(&timestamps, "date").into(),
                 Series::new("dividends".into(), dividends).into(),
                 Series::new("stock_splits".into(), splits).into(),
             ])
@@ -348,7 +375,7 @@ impl Ticker {
             let amounts: Vec<f64> = gains.iter().map(|(_, amt)| *amt).collect();
 
             let df = DataFrame::new(vec![
-                Series::new("date".into(), timestamps).into(),
+                timestamps_to_datetime_series_sec(&timestamps, "date").into(),
                 Series::new("capital_gains".into(), amounts).into(),
             ])
             .map_err(to_py_err)?;
