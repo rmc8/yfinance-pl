@@ -1,8 +1,11 @@
 # yfinance-pl
 
-[English](../../README.md) | [日本語](JA.md) | [中文](ZH.md) | [한국어](KO.md) | [Español](ES.md)
+[![PyPI version](https://img.shields.io/pypi/v/yfinance-pl.svg)](https://pypi.org/project/yfinance-pl/)
+[![Python](https://img.shields.io/pypi/pyversions/yfinance-pl.svg)](https://pypi.org/project/yfinance-pl/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/rmc8/yfinance-pl/blob/main/LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-yfinance--pl.rmc--8.com-blue.svg)](https://yfinance-pl.rmc-8.com/)
 
-**문서**: [https://yfinance-pl.rmc-8.com/](https://yfinance-pl.rmc-8.com/)
+[English](../../README.md) | [日本語](JA.md) | [中文](ZH.md) | [한국어](KO.md) | [Español](ES.md)
 
 PyO3와 Polars를 사용한 [yfinance-rs](https://github.com/gramistella/yfinance-rs) Python 래퍼입니다.
 
