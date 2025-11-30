@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath("../../.."))
 project = "yfinance-pl"
 copyright = "2025 rmc8"
 author = "rmc8"
-release = "0.1.1"
+release = "0.7.2.0"
 language = "ko"
 
 # -- General configuration ---------------------------------------------------
