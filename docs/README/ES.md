@@ -2,6 +2,8 @@
 
 [English](../../README.md) | [日本語](JA.md) | [中文](ZH.md) | [한국어](KO.md) | [Español](ES.md)
 
+**Documentación**: [https://yfinance-pl.rmc-8.com/](https://yfinance-pl.rmc-8.com/)
+
 Un wrapper de Python para [yfinance-rs](https://github.com/gramistella/yfinance-rs) usando PyO3 y Polars.
 
 Obtén datos del mercado de valores con una API compatible con [yfinance](https://github.com/ranaroussi/yfinance), pero con **Polars DataFrames** en lugar de pandas.

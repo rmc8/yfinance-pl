@@ -2,6 +2,8 @@
 
 [English](../../README.md) | [日本語](JA.md) | [中文](ZH.md) | [한국어](KO.md) | [Español](ES.md)
 
+**ドキュメント**: [https://yfinance-pl.rmc-8.com/](https://yfinance-pl.rmc-8.com/)
+
 PyO3とPolarsを使用した[yfinance-rs](https://github.com/gramistella/yfinance-rs)のPythonラッパーです。
 
 [yfinance](https://github.com/ranaroussi/yfinance)互換のAPIで株式市場データを取得できます。pandasではなく**Polars DataFrame**を返します。

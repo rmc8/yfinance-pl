@@ -2,6 +2,8 @@
 
 [English](../../README.md) | [日本語](JA.md) | [中文](ZH.md) | [한국어](KO.md) | [Español](ES.md)
 
+**文档**: [https://yfinance-pl.rmc-8.com/](https://yfinance-pl.rmc-8.com/)
+
 使用 PyO3 和 Polars 的 [yfinance-rs](https://github.com/gramistella/yfinance-rs) Python 封装库。
 
 通过兼容 [yfinance](https://github.com/ranaroussi/yfinance) 的 API 获取股票市场数据，但返回 **Polars DataFrame** 而不是 pandas。
