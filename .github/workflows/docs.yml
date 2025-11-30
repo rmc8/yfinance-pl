@@ -55,17 +55,15 @@ jobs:
           cd docs
           sphinx-build -b html source/es build/html/es
 
-      - name: Copy static files and create root redirect
+      - name: Create root redirect
         run: |
-          mkdir -p docs/build/html/_static
-          cp docs/source/_static/switcher.json docs/build/html/_static/
           cat > docs/build/html/index.html << 'EOF'
           <!DOCTYPE html>
           <html>
           <head>
             <meta charset="utf-8">
             <meta http-equiv="refresh" content="0; url=en/">
-            <link rel="canonical" href="https://rmc8.github.io/yfinance-pl/en/">
+            <link rel="canonical" href="https://yfinance-pl.rmc-8.com/en/">
             <title>Redirecting to yfinance-pl documentation</title>
           </head>
           <body>
@@ -73,6 +71,7 @@ jobs:
           </body>
           </html>
           EOF
+          echo "yfinance-pl.rmc-8.com" > docs/build/html/CNAME
           touch docs/build/html/.nojekyll
 
       - name: Upload artifact

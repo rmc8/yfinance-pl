@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/yfinance-pl.svg)](https://pypi.org/project/yfinance-pl/)
 [![License](https://img.shields.io/pypi/l/yfinance-pl.svg)](https://github.com/rmc8/yfinance-pl/blob/main/LICENSE)
 [![Downloads](https://img.shields.io/pypi/dm/yfinance-pl.svg)](https://pypi.org/project/yfinance-pl/)
-[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue.svg)](https://rmc8.github.io/yfinance-pl/)
+[![Documentation](https://img.shields.io/badge/docs-yfinance--pl.rmc--8.com-blue.svg)](https://yfinance-pl.rmc-8.com/)
 
 [English](README.md) | [日本語](docs/README/JA.md) | [中文](docs/README/ZH.md) | [한국어](docs/README/KO.md) | [Español](docs/README/ES.md)
 

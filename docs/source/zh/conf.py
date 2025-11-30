@@ -34,11 +34,15 @@ html_theme_options = {
     "github_url": "https://github.com/rmc8/yfinance-pl",
     "navbar_align": "left",
     "show_toc_level": 2,
-    "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
-    "switcher": {
-        "json_url": "https://rmc8.github.io/yfinance-pl/_static/switcher.json",
-        "version_match": "zh",
-    },
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    "secondary_sidebar_items": ["page-toc"],
+    "external_links": [
+        {"name": "EN", "url": "https://yfinance-pl.rmc-8.com/en/"},
+        {"name": "JA", "url": "https://yfinance-pl.rmc-8.com/ja/"},
+        {"name": "ZH", "url": "https://yfinance-pl.rmc-8.com/zh/"},
+        {"name": "KO", "url": "https://yfinance-pl.rmc-8.com/ko/"},
+        {"name": "ES", "url": "https://yfinance-pl.rmc-8.com/es/"},
+    ],
 }
 html_static_path = ["../_static"]
 html_context = {

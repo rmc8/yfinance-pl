@@ -39,7 +39,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/rmc8/yfinance-pl"
-Documentation = "https://rmc8.github.io/yfinance-pl/"
+Documentation = "https://yfinance-pl.rmc-8.com/"
 Repository = "https://github.com/rmc8/yfinance-pl"
 Issues = "https://github.com/rmc8/yfinance-pl/issues"
 
