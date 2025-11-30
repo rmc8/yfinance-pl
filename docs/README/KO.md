@@ -16,12 +16,19 @@ PyO3와 Polars를 사용한 [yfinance-rs](https://github.com/gramistella/yfinanc
 - **yfinance 호환 API** - yfinance 사용자에게 익숙한 인터페이스
 - **Polars DataFrame** - `pd.DataFrame` 대신 `pl.DataFrame` 반환
 - **Rust 백엔드** - yfinance-rs 기반의 빠른 데이터 가져오기
+- **타입 안전 API** - `period`, `interval` 및 반환 타입에 대한 IDE 자동 완성
 
 ## 설치
 
-### 사전 요구 사항
+### PyPI에서 설치
 
-protobuf 컴파일러 설치:
+```bash
+pip install yfinance-pl
+```
+
+### 소스에서 빌드
+
+protobuf 컴파일러가 필요합니다:
 
 ```bash
 # macOS
@@ -31,13 +38,7 @@ brew install protobuf
 sudo apt install protobuf-compiler
 ```
 
-### PyPI에서 설치
-
-```bash
-pip install yfinance-pl
-```
-
-### 소스에서 빌드
+빌드:
 
 ```bash
 git clone https://github.com/rmc8/yfinance-pl.git
@@ -62,7 +63,7 @@ print(history)
 
 | 메서드/속성 | 반환 타입 | 설명 |
 |----------------|-------------|-------------|
-| `history(period, interval, start, end)` | `pl.DataFrame` | 과거 가격 데이터 |
+| `history(period, interval, start, end)` | `pl.DataFrame` | 과거 가격 데이터 (`date` 열은 Datetime 타입) |
 
 **`history()` 매개변수:**
 - `period`: 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max

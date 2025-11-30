@@ -25,7 +25,7 @@ Tickerクラス
      - 説明
    * - ``history(period, interval, start, end)``
      - ``pl.DataFrame``
-     - 過去の株価データ
+     - 過去の株価データ（``date`` 列はDatetime型）
 
 **history()のパラメータ:**
 

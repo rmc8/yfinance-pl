@@ -16,12 +16,19 @@ Get stock market data with a [yfinance-compatible](https://github.com/ranaroussi
 - **yfinance-compatible API** - Familiar interface for yfinance users
 - **Polars DataFrames** - Returns `pl.DataFrame` instead of `pd.DataFrame`
 - **Rust backend** - Fast data fetching powered by yfinance-rs
+- **Type-safe API** - IDE autocompletion for `period`, `interval`, and return types
 
 ## Installation
 
-### Prerequisites
+### From PyPI
 
-Install protobuf compiler:
+```bash
+pip install yfinance-pl
+```
+
+### From Source
+
+Requires protobuf compiler:
 
 ```bash
 # macOS
@@ -31,13 +38,7 @@ brew install protobuf
 sudo apt install protobuf-compiler
 ```
 
-### From PyPI
-
-```bash
-pip install yfinance-pl
-```
-
-### From Source
+Then build:
 
 ```bash
 git clone https://github.com/rmc8/yfinance-pl.git
@@ -62,7 +63,7 @@ print(history)
 
 | Method/Property | Return Type | Description |
 |----------------|-------------|-------------|
-| `history(period, interval, start, end)` | `pl.DataFrame` | Historical price data |
+| `history(period, interval, start, end)` | `pl.DataFrame` | Historical price data (`date` column as Datetime) |
 
 **Parameters for `history()`:**
 - `period`: 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max

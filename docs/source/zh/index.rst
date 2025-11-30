@@ -16,6 +16,7 @@ Python 封装库，使用 PyO3 和 Polars。
 - **兼容 yfinance API** - yfinance 用户熟悉的接口
 - **Polars DataFrame** - 返回 ``pl.DataFrame`` 而不是 ``pd.DataFrame``
 - **Rust 后端** - 由 yfinance-rs 提供的快速数据获取
+- **类型安全 API** - 为 ``period``、``interval`` 和返回类型提供 IDE 自动补全
 
 安装
 ----
