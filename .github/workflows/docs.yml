@@ -30,11 +30,50 @@ jobs:
         run: |
           pip install sphinx pydata-sphinx-theme sphinx-copybutton
 
-      - name: Build documentation
+      - name: Build English documentation
         run: |
           cd docs
-          make html
-          touch build/html/.nojekyll
+          sphinx-build -b html source build/html/en
+
+      - name: Build Japanese documentation
+        run: |
+          cd docs
+          sphinx-build -b html source/ja build/html/ja
+
+      - name: Build Chinese documentation
+        run: |
+          cd docs
+          sphinx-build -b html source/zh build/html/zh
+
+      - name: Build Korean documentation
+        run: |
+          cd docs
+          sphinx-build -b html source/ko build/html/ko
+
+      - name: Build Spanish documentation
+        run: |
+          cd docs
+          sphinx-build -b html source/es build/html/es
+
+      - name: Copy static files and create root redirect
+        run: |
+          mkdir -p docs/build/html/_static
+          cp docs/source/_static/switcher.json docs/build/html/_static/
+          cat > docs/build/html/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta http-equiv="refresh" content="0; url=en/">
+            <link rel="canonical" href="https://rmc8.github.io/yfinance-pl/en/">
+            <title>Redirecting to yfinance-pl documentation</title>
+          </head>
+          <body>
+            <p>Redirecting to <a href="en/">English documentation</a>...</p>
+          </body>
+          </html>
+          EOF
+          touch docs/build/html/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

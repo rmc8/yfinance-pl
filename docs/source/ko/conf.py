@@ -1,7 +1,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../.."))
+sys.path.insert(0, os.path.abspath("../../.."))
 
 # Configuration file for the Sphinx documentation builder.
 
@@ -11,6 +11,7 @@ project = "yfinance-pl"
 copyright = "2025 rmc8"
 author = "rmc8"
 release = "0.1.1"
+language = "ko"
 
 # -- General configuration ---------------------------------------------------
 
@@ -22,8 +23,8 @@ extensions = [
     "sphinx_copybutton",
 ]
 
-templates_path = ["_templates"]
-exclude_patterns = ["ja", "zh", "ko", "es"]
+templates_path = ["../_templates"]
+exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -36,11 +37,10 @@ html_theme_options = {
     "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
     "switcher": {
         "json_url": "https://rmc8.github.io/yfinance-pl/_static/switcher.json",
-        "version_match": "en",
+        "version_match": "ko",
     },
 }
-html_static_path = ["_static"]
+html_static_path = ["../_static"]
 html_context = {
     "default_mode": "auto",
 }
-language = "en"
