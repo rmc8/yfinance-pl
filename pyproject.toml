@@ -1,6 +1,6 @@
 [project]
 name = "yfinance-pl"
-version = "0.7.2.0"
+version = "0.7.2.1"
 description = "Python wrapper for yfinance-rs using PyO3 and Polars"
 readme = "README.md"
 requires-python = ">=3.10"
