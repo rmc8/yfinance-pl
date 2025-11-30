@@ -16,6 +16,7 @@ Características
 - **API compatible con yfinance** - Interfaz familiar para usuarios de yfinance
 - **Polars DataFrame** - Devuelve ``pl.DataFrame`` en lugar de ``pd.DataFrame``
 - **Backend Rust** - Obtención rápida de datos mediante yfinance-rs
+- **API con tipos seguros** - Autocompletado del IDE para ``period``, ``interval`` y tipos de retorno
 
 Instalación
 -----------

@@ -16,12 +16,19 @@
 - **兼容 yfinance API** - yfinance 用户熟悉的接口
 - **Polars DataFrame** - 返回 `pl.DataFrame` 而不是 `pd.DataFrame`
 - **Rust 后端** - 由 yfinance-rs 提供的快速数据获取
+- **类型安全 API** - 为 `period`、`interval` 和返回类型提供 IDE 自动补全
 
 ## 安装
 
-### 前置条件
+### 从 PyPI 安装
 
-安装 protobuf 编译器:
+```bash
+pip install yfinance-pl
+```
+
+### 从源码构建
+
+需要 protobuf 编译器:
 
 ```bash
 # macOS
@@ -31,13 +38,7 @@ brew install protobuf
 sudo apt install protobuf-compiler
 ```
 
-### 从 PyPI 安装
-
-```bash
-pip install yfinance-pl
-```
-
-### 从源码构建
+然后构建:
 
 ```bash
 git clone https://github.com/rmc8/yfinance-pl.git
@@ -62,7 +63,7 @@ print(history)
 
 | 方法/属性 | 返回类型 | 描述 |
 |----------------|-------------|-------------|
-| `history(period, interval, start, end)` | `pl.DataFrame` | 历史价格数据 |
+| `history(period, interval, start, end)` | `pl.DataFrame` | 历史价格数据（`date` 列为 Datetime 类型） |
 
 **`history()` 参数:**
 - `period`: 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max

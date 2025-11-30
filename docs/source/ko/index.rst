@@ -16,6 +16,7 @@ pandas 대신 **Polars DataFrame**을 반환합니다.
 - **yfinance 호환 API** - yfinance 사용자에게 익숙한 인터페이스
 - **Polars DataFrame** - ``pd.DataFrame`` 대신 ``pl.DataFrame`` 반환
 - **Rust 백엔드** - yfinance-rs를 통한 빠른 데이터 가져오기
+- **타입 안전 API** - ``period``, ``interval`` 및 반환 타입에 대한 IDE 자동 완성
 
 설치
 ----

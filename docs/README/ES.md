@@ -16,12 +16,19 @@ Obtén datos del mercado de valores con una API compatible con [yfinance](https:
 - **API compatible con yfinance** - Interfaz familiar para usuarios de yfinance
 - **Polars DataFrames** - Devuelve `pl.DataFrame` en lugar de `pd.DataFrame`
 - **Backend en Rust** - Obtención rápida de datos impulsada por yfinance-rs
+- **API con tipos seguros** - Autocompletado del IDE para `period`, `interval` y tipos de retorno
 
 ## Instalación
 
-### Requisitos previos
+### Desde PyPI
 
-Instalar el compilador de protobuf:
+```bash
+pip install yfinance-pl
+```
+
+### Desde el código fuente
+
+Requiere compilador de protobuf:
 
 ```bash
 # macOS
@@ -31,13 +38,7 @@ brew install protobuf
 sudo apt install protobuf-compiler
 ```
 
-### Desde PyPI
-
-```bash
-pip install yfinance-pl
-```
-
-### Desde el código fuente
+Luego compilar:
 
 ```bash
 git clone https://github.com/rmc8/yfinance-pl.git
@@ -62,7 +63,7 @@ print(history)
 
 | Método/Propiedad | Tipo de retorno | Descripción |
 |----------------|-------------|-------------|
-| `history(period, interval, start, end)` | `pl.DataFrame` | Datos históricos de precios |
+| `history(period, interval, start, end)` | `pl.DataFrame` | Datos históricos de precios (columna `date` como Datetime) |
 
 **Parámetros de `history()`:**
 - `period`: 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max

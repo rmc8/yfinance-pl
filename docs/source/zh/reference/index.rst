@@ -25,7 +25,7 @@ Ticker 类
      - 描述
    * - ``history(period, interval, start, end)``
      - ``pl.DataFrame``
-     - 历史价格数据
+     - 历史价格数据（``date`` 列为 Datetime 类型）
 
 **history() 参数:**
 

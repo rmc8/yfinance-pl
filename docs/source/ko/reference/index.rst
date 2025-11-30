@@ -25,7 +25,7 @@ Ticker 클래스
      - 설명
    * - ``history(period, interval, start, end)``
      - ``pl.DataFrame``
-     - 과거 주가 데이터
+     - 과거 주가 데이터 (``date`` 열은 Datetime 타입)
 
 **history() 파라미터:**
 

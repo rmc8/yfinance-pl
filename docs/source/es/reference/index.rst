@@ -25,7 +25,7 @@ Historial de precios
      - Descripción
    * - ``history(period, interval, start, end)``
      - ``pl.DataFrame``
-     - Datos históricos de precios
+     - Datos históricos de precios (columna ``date`` como Datetime)
 
 **Parámetros de history():**
 

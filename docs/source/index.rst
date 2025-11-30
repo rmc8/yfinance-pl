@@ -16,6 +16,7 @@ Features
 - **yfinance-compatible API** - Familiar interface for yfinance users
 - **Polars DataFrames** - Returns ``pl.DataFrame`` instead of ``pd.DataFrame``
 - **Rust backend** - Fast data fetching powered by yfinance-rs
+- **Type-safe API** - IDE autocompletion for ``period``, ``interval``, and return types
 
 Install
 -------
