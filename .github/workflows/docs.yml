@@ -55,8 +55,10 @@ jobs:
           cd docs
           sphinx-build -b html source/es build/html/es
 
-      - name: Create root redirect
+      - name: Copy static files and create root redirect
         run: |
+          mkdir -p docs/build/html/_static
+          cp docs/source/_static/language-switcher.json docs/build/html/_static/
           cat > docs/build/html/index.html << 'EOF'
           <!DOCTYPE html>
           <html>

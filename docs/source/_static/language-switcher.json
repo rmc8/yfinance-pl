@@ -1,0 +1,27 @@
+[
+  {
+    "name": "English",
+    "version": "en",
+    "url": "https://yfinance-pl.rmc-8.com/en/"
+  },
+  {
+    "name": "日本語",
+    "version": "ja",
+    "url": "https://yfinance-pl.rmc-8.com/ja/"
+  },
+  {
+    "name": "中文",
+    "version": "zh",
+    "url": "https://yfinance-pl.rmc-8.com/zh/"
+  },
+  {
+    "name": "한국어",
+    "version": "ko",
+    "url": "https://yfinance-pl.rmc-8.com/ko/"
+  },
+  {
+    "name": "Español",
+    "version": "es",
+    "url": "https://yfinance-pl.rmc-8.com/es/"
+  }
+]
