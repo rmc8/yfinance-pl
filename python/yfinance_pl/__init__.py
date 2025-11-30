@@ -155,4 +155,4 @@ __all__ = [
     "CalendarInfo",
     "EarningsInfo",
 ]
-__version__ = "0.7.2.1"
+__version__ = "0.7.2.2"
