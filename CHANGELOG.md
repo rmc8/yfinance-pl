@@ -5,17 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.7.2.1] - 2025-11-30
+## [0.7.2.2] - 2025-11-30
 
 ### Added
 - Type-safe API with `Literal` type hints for `period` and `interval` parameters
 - `TypedDict` definitions for structured return types (`TickerInfo`, `FastInfo`, `CalendarInfo`, `EarningsInfo`)
 - `.pyi` stub file for enhanced IDE autocompletion support
+- Added "Type-safe API" feature description to documentation (all languages)
 
 ### Changed
 - **Breaking**: Renamed `ts` column to `date` in `history()` output
 - **Breaking**: Changed `date` column type from `i64` (Unix timestamp) to `Datetime` type
 - Documentation: Reorganized Installation section (PyPI first, protobuf only for source builds)
+- Documentation: Updated `history()` description to note `date` column is Datetime type
 
 ### Fixed
 - `dividends`, `splits`, `actions`, `capital_gains` now return proper `Datetime` type for date column
