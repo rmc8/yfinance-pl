@@ -4,11 +4,11 @@ yfinance-pl 문서
 Polars DataFrame으로 시장 데이터 가져오기
 -----------------------------------------
 
-**yfinance-pl**은 `yfinance-rs <https://github.com/gramistella/yfinance-rs>`_\ 의
+**yfinance-pl**\ 은 `yfinance-rs <https://github.com/gramistella/yfinance-rs>`_\ 의
 PyO3와 Polars를 사용한 Python 래퍼입니다.
 
 `yfinance <https://github.com/ranaroussi/yfinance>`_ 호환 API로 주식 시장 데이터를 가져올 수 있습니다.
-pandas 대신 **Polars DataFrame**을 반환합니다.
+pandas 대신 **Polars DataFrame**\ 을 반환합니다.
 
 특징
 ----

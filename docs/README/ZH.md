@@ -28,18 +28,6 @@ pip install yfinance-pl
 
 ### 从源码构建
 
-需要 protobuf 编译器:
-
-```bash
-# macOS
-brew install protobuf
-
-# Ubuntu/Debian
-sudo apt install protobuf-compiler
-```
-
-然后构建:
-
 ```bash
 git clone https://github.com/rmc8/yfinance-pl.git
 cd yfinance-pl
@@ -63,7 +51,7 @@ print(history)
 
 | 方法/属性 | 返回类型 | 描述 |
 |----------------|-------------|-------------|
-| `history(period, interval, start, end)` | `pl.DataFrame` | 历史价格数据（`date` 列为 Datetime 类型） |
+| `history(period, interval, start, end)` | `pl.DataFrame` | 历史价格数据（`Date` 列为 Datetime 类型） |
 
 **`history()` 参数:**
 - `period`: 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max

@@ -28,18 +28,6 @@ pip install yfinance-pl
 
 ### ソースからビルド
 
-protobufコンパイラが必要です:
-
-```bash
-# macOS
-brew install protobuf
-
-# Ubuntu/Debian
-sudo apt install protobuf-compiler
-```
-
-ビルド:
-
 ```bash
 git clone https://github.com/rmc8/yfinance-pl.git
 cd yfinance-pl
@@ -63,7 +51,7 @@ print(history)
 
 | メソッド/プロパティ | 戻り値の型 | 説明 |
 |----------------|-------------|-------------|
-| `history(period, interval, start, end)` | `pl.DataFrame` | 過去の株価データ（`date`列はDatetime型） |
+| `history(period, interval, start, end)` | `pl.DataFrame` | 過去の株価データ（`Date`列はDatetime型） |
 
 **`history()`のパラメータ:**
 - `period`: 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
