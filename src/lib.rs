@@ -15,27 +15,107 @@ fn to_py_err<E: std::fmt::Display>(e: E) -> PyErr {
     PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(e.to_string())
 }
 
-/// Convert 'ts' column (i64 milliseconds) to 'date' column (Datetime type)
-fn convert_ts_to_date(df: DataFrame) -> PolarsResult<DataFrame> {
-    if let Ok(ts_col) = df.column("ts") {
-        // Cast ts column to Datetime
-        let date_col = ts_col
-            .cast(&DataType::Datetime(TimeUnit::Milliseconds, None))?
-            .with_name("date".into());
+/// Normalize history DataFrame to match official yfinance column names and order:
+/// Date (Datetime), Open (Float64), High (Float64), Low (Float64), Close (Float64), Volume (Int64), [Adj Close (Float64)]
+fn normalize_history_df(df: DataFrame) -> PolarsResult<DataFrame> {
+    let mut exprs = Vec::new();
 
-        // Drop ts column and add date column
-        let mut df = df.drop("ts")?;
-        df.with_column(date_col)?;
+    // Date
+    if df.column("ts").is_ok() {
+        exprs.push(
+            col("ts")
+                .cast(DataType::Datetime(TimeUnit::Milliseconds, None))
+                .alias("Date"),
+        );
+    } else if df.column("date").is_ok() {
+        exprs.push(
+            col("date")
+                .cast(DataType::Datetime(TimeUnit::Milliseconds, None))
+                .alias("Date"),
+        );
+    } else if df.column("Date").is_ok() {
+        exprs.push(
+            col("Date")
+                .cast(DataType::Datetime(TimeUnit::Milliseconds, None))
+                .alias("Date"),
+        );
+    }
+
+    // Open
+    if df.column("open.amount").is_ok() {
+        exprs.push(col("open.amount").cast(DataType::Float64).alias("Open"));
+    } else if df.column("open").is_ok() {
+        exprs.push(col("open").cast(DataType::Float64).alias("Open"));
+    } else if df.column("Open").is_ok() {
+        exprs.push(col("Open").cast(DataType::Float64).alias("Open"));
+    }
+
+    // High
+    if df.column("high.amount").is_ok() {
+        exprs.push(col("high.amount").cast(DataType::Float64).alias("High"));
+    } else if df.column("high").is_ok() {
+        exprs.push(col("high").cast(DataType::Float64).alias("High"));
+    } else if df.column("High").is_ok() {
+        exprs.push(col("High").cast(DataType::Float64).alias("High"));
+    }
+
+    // Low
+    if df.column("low.amount").is_ok() {
+        exprs.push(col("low.amount").cast(DataType::Float64).alias("Low"));
+    } else if df.column("low").is_ok() {
+        exprs.push(col("low").cast(DataType::Float64).alias("Low"));
+    } else if df.column("Low").is_ok() {
+        exprs.push(col("Low").cast(DataType::Float64).alias("Low"));
+    }
+
+    // Close
+    if df.column("close.amount").is_ok() {
+        exprs.push(col("close.amount").cast(DataType::Float64).alias("Close"));
+    } else if df.column("close").is_ok() {
+        exprs.push(col("close").cast(DataType::Float64).alias("Close"));
+    } else if df.column("Close").is_ok() {
+        exprs.push(col("Close").cast(DataType::Float64).alias("Close"));
+    }
+
+    // Volume
+    if df.column("volume.amount").is_ok() {
+        exprs.push(col("volume.amount").cast(DataType::Int64).alias("Volume"));
+    } else if df.column("volume").is_ok() {
+        exprs.push(col("volume").cast(DataType::Int64).alias("Volume"));
+    } else if df.column("Volume").is_ok() {
+        exprs.push(col("Volume").cast(DataType::Int64).alias("Volume"));
+    }
+
+    // Optional Adj Close if present
+    if df.column("close_unadj.amount").is_ok() {
+        exprs.push(
+            col("close_unadj.amount")
+                .cast(DataType::Float64)
+                .alias("Adj Close"),
+        );
+    } else if df.column("close_unadj").is_ok() {
+        exprs.push(
+            col("close_unadj")
+                .cast(DataType::Float64)
+                .alias("Adj Close"),
+        );
+    } else if df.column("Adj Close").is_ok() {
+        exprs.push(col("Adj Close").cast(DataType::Float64).alias("Adj Close"));
+    }
+
+    if exprs.is_empty() {
         Ok(df)
     } else {
-        Ok(df)
+        df.lazy().select(exprs).collect()
     }
 }
 
-/// Convert i64 timestamps (seconds) to a Datetime Series
-fn timestamps_to_datetime_series_sec(timestamps: &[i64], name: &str) -> Series {
-    // Convert seconds to milliseconds
-    let timestamps_ms: Vec<i64> = timestamps.iter().map(|ts| ts * 1000).collect();
+/// Convert NaiveDates to a Datetime Series
+fn naivedates_to_datetime_series(dates: &[chrono::NaiveDate], name: &str) -> Series {
+    let timestamps_ms: Vec<i64> = dates
+        .iter()
+        .map(|d| d.and_hms_opt(0, 0, 0).unwrap().and_utc().timestamp_millis())
+        .collect();
     Series::new(name.into(), timestamps_ms)
         .cast(&DataType::Datetime(TimeUnit::Milliseconds, None))
         .unwrap()
@@ -94,8 +174,8 @@ impl Ticker {
     /// Args:
     ///     period: Data period (1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max)
     ///     interval: Data interval (1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo)
-    ///     start: Start date (not yet implemented)
-    ///     end: End date (not yet implemented)
+    ///     start: Start date (YYYY-MM-DD or RFC3339)
+    ///     end: End date (YYYY-MM-DD or RFC3339)
     ///     prepost: Include pre and post market data
     ///     auto_adjust: Adjust prices for splits and dividends
     ///     actions: Include dividends and stock splits
@@ -110,8 +190,6 @@ impl Ticker {
         auto_adjust: bool,
         actions: bool,
     ) -> PyResult<PyDataFrame> {
-        let _ = (start, end); // TODO: implement start/end date filtering
-
         let runtime = create_runtime()?;
         let symbol = self.symbol.clone();
 
@@ -119,20 +197,45 @@ impl Ticker {
             let client = YfClient::default();
             let ticker = YfTicker::new(&client, &symbol);
 
-            let range_val = parse_range(period.unwrap_or("1mo"));
             let interval_val = parse_interval(interval.unwrap_or("1d"));
 
             let mut builder = ticker.history_builder();
             builder = builder
-                .range(range_val)
                 .interval(interval_val)
                 .auto_adjust(auto_adjust)
                 .prepost(prepost)
                 .actions(actions);
 
+            if let Some(start_str) = start {
+                let start_date = chrono::NaiveDate::parse_from_str(start_str, "%Y-%m-%d")
+                    .map(|d| d.and_hms_opt(0, 0, 0).unwrap().and_utc())
+                    .or_else(|_| {
+                        chrono::DateTime::parse_from_rfc3339(start_str)
+                            .map(|dt| dt.with_timezone(&chrono::Utc))
+                    })
+                    .map_err(|e| to_py_err(format!("Invalid start date format: {}", e)))?;
+
+                let end_date = if let Some(end_str) = end {
+                    chrono::NaiveDate::parse_from_str(end_str, "%Y-%m-%d")
+                        .map(|d| d.and_hms_opt(23, 59, 59).unwrap().and_utc())
+                        .or_else(|_| {
+                            chrono::DateTime::parse_from_rfc3339(end_str)
+                                .map(|dt| dt.with_timezone(&chrono::Utc))
+                        })
+                        .map_err(|e| to_py_err(format!("Invalid end date format: {}", e)))?
+                } else {
+                    chrono::Utc::now()
+                };
+
+                builder = builder.between(start_date, end_date);
+            } else {
+                let range_val = parse_range(period.unwrap_or("1mo"));
+                builder = builder.range(range_val);
+            }
+
             let candles = builder.fetch().await.map_err(to_py_err)?;
             let df = candles.to_dataframe().map_err(to_py_err)?;
-            let df = convert_ts_to_date(df).map_err(to_py_err)?;
+            let df = normalize_history_df(df).map_err(to_py_err)?;
             Ok(PyDataFrame(df))
         })
     }
@@ -154,77 +257,75 @@ impl Ticker {
             dict.set_item("symbol", &symbol)?;
 
             // Name
-            if let Some(name) = &info.name {
+            if let Some(name) = &info.snapshot.name {
                 dict.set_item("shortName", name)?;
             }
 
             // ISIN
-            if let Some(isin) = &info.isin {
+            if let Some(isin) = &info.snapshot.instrument.isin {
                 dict.set_item("isin", isin.to_string())?;
             }
 
             // Exchange
-            if let Some(exchange) = &info.exchange {
+            if let Some(exchange) = &info.snapshot.instrument.exchange {
                 dict.set_item("exchange", format!("{:?}", exchange))?;
             }
 
             // Market state
-            if let Some(state) = &info.market_state {
+            if let Some(state) = &info.snapshot.market_state {
                 dict.set_item("marketState", format!("{:?}", state))?;
             }
 
             // Currency
-            if let Some(currency) = &info.currency {
-                dict.set_item("currency", format!("{:?}", currency))?;
-            }
+            dict.set_item("currency", format!("{:?}", info.snapshot.currency))?;
 
             // Prices
-            if let Some(last) = &info.last {
-                dict.set_item("regularMarketPrice", last.amount().to_string())?;
+            if let Some(last) = &info.snapshot.last {
+                dict.set_item("regularMarketPrice", last.to_string())?;
             }
-            if let Some(open) = &info.open {
-                dict.set_item("regularMarketOpen", open.amount().to_string())?;
+            if let Some(open) = &info.snapshot.open {
+                dict.set_item("regularMarketOpen", open.to_string())?;
             }
-            if let Some(high) = &info.high {
-                dict.set_item("regularMarketDayHigh", high.amount().to_string())?;
+            if let Some(high) = &info.snapshot.day_high {
+                dict.set_item("regularMarketDayHigh", high.to_string())?;
             }
-            if let Some(low) = &info.low {
-                dict.set_item("regularMarketDayLow", low.amount().to_string())?;
+            if let Some(low) = &info.snapshot.day_low {
+                dict.set_item("regularMarketDayLow", low.to_string())?;
             }
-            if let Some(prev) = &info.previous_close {
-                dict.set_item("regularMarketPreviousClose", prev.amount().to_string())?;
+            if let Some(prev) = &info.snapshot.previous_close {
+                dict.set_item("regularMarketPreviousClose", prev.to_string())?;
             }
 
             // Volume
-            if let Some(vol) = info.volume {
-                dict.set_item("regularMarketVolume", vol)?;
+            if let Some(vol) = &info.snapshot.volume {
+                dict.set_item("regularMarketVolume", vol.to_string())?;
             }
-            if let Some(avg_vol) = info.average_volume {
+            if let Some(avg_vol) = info.key_statistics.average_daily_volume_3m {
                 dict.set_item("averageVolume", avg_vol)?;
             }
 
             // Fundamentals
-            if let Some(mc) = &info.market_cap {
+            if let Some(mc) = &info.key_statistics.market_cap {
                 dict.set_item("marketCap", mc.amount().to_string())?;
             }
-            if let Some(shares) = info.shares_outstanding {
+            if let Some(shares) = info.key_statistics.shares_outstanding {
                 dict.set_item("sharesOutstanding", shares)?;
             }
-            if let Some(eps) = &info.eps_ttm {
+            if let Some(eps) = &info.key_statistics.eps_trailing_twelve_months {
                 dict.set_item("trailingEps", eps.amount().to_string())?;
             }
-            if let Some(pe) = &info.pe_ttm {
+            if let Some(pe) = &info.key_statistics.pe_trailing_twelve_months {
                 dict.set_item("trailingPE", pe.to_string())?;
             }
-            if let Some(div_yield) = &info.dividend_yield {
+            if let Some(div_yield) = &info.key_statistics.dividend_yield_trailing {
                 dict.set_item("dividendYield", div_yield.to_string())?;
             }
 
             // 52-week range
-            if let Some(low52) = &info.fifty_two_week_low {
+            if let Some(low52) = &info.key_statistics.fifty_two_week_low {
                 dict.set_item("fiftyTwoWeekLow", low52.amount().to_string())?;
             }
-            if let Some(high52) = &info.fifty_two_week_high {
+            if let Some(high52) = &info.key_statistics.fifty_two_week_high {
                 dict.set_item("fiftyTwoWeekHigh", high52.amount().to_string())?;
             }
 
@@ -246,17 +347,15 @@ impl Ticker {
             let dict = PyDict::new(py);
             dict.set_item("symbol", &symbol)?;
 
-            if let Some(name) = &fast_info.name {
+            if let Some(name) = &fast_info.snapshot.name {
                 dict.set_item("name", name)?;
             }
-            if let Some(exchange) = &fast_info.exchange {
+            if let Some(exchange) = &fast_info.snapshot.instrument.exchange {
                 dict.set_item("exchange", format!("{:?}", exchange))?;
             }
-            if let Some(currency) = &fast_info.currency {
-                dict.set_item("currency", format!("{:?}", currency))?;
-            }
-            if let Some(volume) = fast_info.volume {
-                dict.set_item("volume", volume)?;
+            dict.set_item("currency", format!("{:?}", fast_info.snapshot.currency))?;
+            if let Some(volume) = &fast_info.snapshot.volume {
+                dict.set_item("volume", volume.to_string())?;
             }
 
             Ok(dict.into())
@@ -272,15 +371,25 @@ impl Ticker {
         runtime.block_on(async move {
             let client = YfClient::default();
             let ticker = YfTicker::new(&client, &symbol);
-            let divs = ticker.dividends(None).await.map_err(to_py_err)?;
+            let acts = ticker.actions(None).await.map_err(to_py_err)?;
 
-            let timestamps: Vec<i64> = divs.iter().map(|(ts, _)| *ts).collect();
-            let amounts: Vec<f64> = divs.iter().map(|(_, amt)| *amt).collect();
+            let mut dates: Vec<chrono::NaiveDate> = Vec::new();
+            let mut amounts: Vec<f64> = Vec::new();
 
-            let df = DataFrame::new(vec![
-                timestamps_to_datetime_series_sec(&timestamps, "date").into(),
-                Series::new("dividends".into(), amounts).into(),
-            ])
+            for action in acts {
+                if let yfinance_rs::Action::Dividend { date, amount } = action {
+                    dates.push(date);
+                    amounts.push(amount.amount().to_string().parse::<f64>().unwrap_or(0.0));
+                }
+            }
+
+            let df = DataFrame::new(
+                dates.len(),
+                vec![
+                    naivedates_to_datetime_series(&dates, "Date").into(),
+                    Series::new("Dividends".into(), amounts).into(),
+                ],
+            )
             .map_err(to_py_err)?;
 
             Ok(PyDataFrame(df))
@@ -296,18 +405,30 @@ impl Ticker {
         runtime.block_on(async move {
             let client = YfClient::default();
             let ticker = YfTicker::new(&client, &symbol);
-            let splits = ticker.splits(None).await.map_err(to_py_err)?;
+            let acts = ticker.actions(None).await.map_err(to_py_err)?;
 
-            let timestamps: Vec<i64> = splits.iter().map(|(ts, _, _)| *ts).collect();
-            let ratios: Vec<f64> = splits
-                .iter()
-                .map(|(_, num, den)| *num as f64 / *den as f64)
-                .collect();
+            let mut dates: Vec<chrono::NaiveDate> = Vec::new();
+            let mut ratios: Vec<f64> = Vec::new();
 
-            let df = DataFrame::new(vec![
-                timestamps_to_datetime_series_sec(&timestamps, "date").into(),
-                Series::new("stock_splits".into(), ratios).into(),
-            ])
+            for action in acts {
+                if let yfinance_rs::Action::Split {
+                    date,
+                    numerator,
+                    denominator,
+                } = action
+                {
+                    dates.push(date);
+                    ratios.push(numerator.get() as f64 / denominator.get() as f64);
+                }
+            }
+
+            let df = DataFrame::new(
+                dates.len(),
+                vec![
+                    naivedates_to_datetime_series(&dates, "Date").into(),
+                    Series::new("Stock Splits".into(), ratios).into(),
+                ],
+            )
             .map_err(to_py_err)?;
 
             Ok(PyDataFrame(df))
@@ -325,35 +446,41 @@ impl Ticker {
             let ticker = YfTicker::new(&client, &symbol);
             let acts = ticker.actions(None).await.map_err(to_py_err)?;
 
-            let mut timestamps: Vec<i64> = Vec::new();
+            let mut dates: Vec<chrono::NaiveDate> = Vec::new();
             let mut dividends: Vec<Option<f64>> = Vec::new();
             let mut splits: Vec<Option<f64>> = Vec::new();
 
             for action in acts {
                 match action {
-                    yfinance_rs::core::Action::Dividend { ts, amount } => {
-                        timestamps.push(yfinance_rs::core::conversions::datetime_to_i64(ts));
-                        dividends.push(Some(yfinance_rs::core::conversions::money_to_f64(&amount)));
+                    yfinance_rs::Action::Dividend { date, amount } => {
+                        dates.push(date);
+                        dividends.push(Some(
+                            amount.amount().to_string().parse::<f64>().unwrap_or(0.0),
+                        ));
                         splits.push(None);
                     }
-                    yfinance_rs::core::Action::Split {
-                        ts,
+                    yfinance_rs::Action::Split {
+                        date,
                         numerator,
                         denominator,
                     } => {
-                        timestamps.push(yfinance_rs::core::conversions::datetime_to_i64(ts));
+                        dates.push(date);
                         dividends.push(None);
-                        splits.push(Some(numerator as f64 / denominator as f64));
+                        splits.push(Some(numerator.get() as f64 / denominator.get() as f64));
                     }
-                    yfinance_rs::core::Action::CapitalGain { .. } => {}
+                    yfinance_rs::Action::CapitalGain { .. } => {}
+                    _ => {}
                 }
             }
 
-            let df = DataFrame::new(vec![
-                timestamps_to_datetime_series_sec(&timestamps, "date").into(),
-                Series::new("dividends".into(), dividends).into(),
-                Series::new("stock_splits".into(), splits).into(),
-            ])
+            let df = DataFrame::new(
+                dates.len(),
+                vec![
+                    naivedates_to_datetime_series(&dates, "Date").into(),
+                    Series::new("Dividends".into(), dividends).into(),
+                    Series::new("Stock Splits".into(), splits).into(),
+                ],
+            )
             .map_err(to_py_err)?;
 
             Ok(PyDataFrame(df))
@@ -369,15 +496,25 @@ impl Ticker {
         runtime.block_on(async move {
             let client = YfClient::default();
             let ticker = YfTicker::new(&client, &symbol);
-            let gains = ticker.capital_gains(None).await.map_err(to_py_err)?;
+            let acts = ticker.actions(None).await.map_err(to_py_err)?;
 
-            let timestamps: Vec<i64> = gains.iter().map(|(ts, _)| *ts).collect();
-            let amounts: Vec<f64> = gains.iter().map(|(_, amt)| *amt).collect();
+            let mut dates: Vec<chrono::NaiveDate> = Vec::new();
+            let mut amounts: Vec<f64> = Vec::new();
 
-            let df = DataFrame::new(vec![
-                timestamps_to_datetime_series_sec(&timestamps, "date").into(),
-                Series::new("capital_gains".into(), amounts).into(),
-            ])
+            for action in acts {
+                if let yfinance_rs::Action::CapitalGain { date, gain } = action {
+                    dates.push(date);
+                    amounts.push(gain.amount().to_string().parse::<f64>().unwrap_or(0.0));
+                }
+            }
+
+            let df = DataFrame::new(
+                dates.len(),
+                vec![
+                    naivedates_to_datetime_series(&dates, "Date").into(),
+                    Series::new("Capital Gains".into(), amounts).into(),
+                ],
+            )
             .map_err(to_py_err)?;
 
             Ok(PyDataFrame(df))
@@ -525,7 +662,6 @@ impl Ticker {
             let dict = PyDict::new(py);
             dict.set_item("symbol", &symbol)?;
 
-            // earnings_dates is Vec, not Option
             let date_strs: Vec<String> = cal.earnings_dates.iter().map(|d| d.to_string()).collect();
             dict.set_item("earningsDates", date_strs)?;
 
@@ -586,10 +722,13 @@ impl Ticker {
             let categories: Vec<String> = holders.iter().map(|h| h.category.clone()).collect();
             let values: Vec<String> = holders.iter().map(|h| h.value.to_string()).collect();
 
-            let df = DataFrame::new(vec![
-                Series::new("Breakdown".into(), categories).into(),
-                Series::new("Value".into(), values).into(),
-            ])
+            let df = DataFrame::new(
+                categories.len(),
+                vec![
+                    Series::new("Breakdown".into(), categories).into(),
+                    Series::new("Value".into(), values).into(),
+                ],
+            )
             .map_err(to_py_err)?;
 
             Ok(PyDataFrame(df))
@@ -669,7 +808,6 @@ impl Ticker {
             let ticker = YfTicker::new(&client, &symbol);
             let timestamps = ticker.options().await.map_err(to_py_err)?;
 
-            // Convert Unix timestamps to YYYY-MM-DD strings
             let dates: Vec<String> = timestamps
                 .iter()
                 .map(|ts| {
@@ -700,7 +838,6 @@ impl Ticker {
             let client = YfClient::default();
             let ticker = YfTicker::new(&client, &symbol);
 
-            // Convert date string to Unix timestamp if provided
             let timestamp = if let Some(ref date) = date_str {
                 let naive = chrono::NaiveDate::parse_from_str(date, "%Y-%m-%d")
                     .map_err(|e| to_py_err(format!("Invalid date format: {}", e)))?;
@@ -717,8 +854,11 @@ impl Ticker {
 
             let chain = ticker.option_chain(timestamp).await.map_err(to_py_err)?;
 
-            let calls_df = chain.calls.to_dataframe().map_err(to_py_err)?;
-            let puts_df = chain.puts.to_dataframe().map_err(to_py_err)?;
+            let calls: Vec<_> = chain.calls().cloned().collect();
+            let puts: Vec<_> = chain.puts().cloned().collect();
+
+            let calls_df = calls.to_dataframe().map_err(to_py_err)?;
+            let puts_df = puts.to_dataframe().map_err(to_py_err)?;
 
             Ok((PyDataFrame(calls_df), PyDataFrame(puts_df)))
         })

@@ -263,3 +263,5 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/python,rust,macos,linux,windows
+
+.vscode/
