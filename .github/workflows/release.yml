@@ -2,14 +2,69 @@ name: Release to PyPI
 
 on:
   push:
+    branches:
+      - main
     tags:
-      - 'v*'
+      - "v*.*.*"
+  release:
+    types: [published]
+  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  build:
+  check:
+    name: Check version and determine release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      skip: ${{ steps.check.outputs.skip }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check version and determine release
+        id: check
+        run: |
+          VERSION=$(grep -m 1 '^version = ' pyproject.toml | cut -d '"' -f 2)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+          # PyPI上に同一バージョンが既に存在するか確認
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/yfinance-pl/$VERSION/json")
+          if [ "$STATUS_CODE" = "200" ]; then
+            echo "yfinance-pl $VERSION is already published on PyPI. Skipping publish."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Version v$VERSION will be published."
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+  build-sdist:
+    name: Build source distribution (sdist)
+    needs: check
+    if: needs.check.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+
+      - name: Upload sdist
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist
+
+  build-wheels:
+    name: Build wheels (${{ matrix.os }} - py${{ matrix.python-version }})
+    needs: check
+    if: needs.check.outputs.skip != 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -26,18 +81,6 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-action@stable
 
-      - name: Install protobuf (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get install -y protobuf-compiler
-
-      - name: Install protobuf (macOS)
-        if: matrix.os == 'macos-latest'
-        run: brew install protobuf
-
-      - name: Install protobuf (Windows)
-        if: matrix.os == 'windows-latest'
-        run: choco install protoc
-
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -50,18 +93,43 @@ jobs:
           path: dist
 
   publish:
-    needs: build
+    name: Publish distribution 📦 to PyPI
+    needs: [check, build-sdist, build-wheels]
+    if: needs.check.outputs.skip != 'true'
     runs-on: ubuntu-latest
-    environment: pypi
+    environment:
+      name: pypi
+      url: https://pypi.org/p/yfinance-pl
     permissions:
-      id-token: write
+      id-token: write  # Mandatory for Trusted Publishing (OIDC)
+      contents: write  # Required for creating git tags and GitHub releases
     steps:
-      - name: Download wheels
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all distributions
         uses: actions/download-artifact@v4
         with:
-          pattern: wheels-*
           path: dist
           merge-multiple: true
 
-      - name: Publish to PyPI
+      - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+
+      - name: Create Git Tag and GitHub Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.check.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            git tag -a "v$VERSION" -m "Release v$VERSION"
+            git push origin "v$VERSION"
+          fi
+          if ! gh release view "v$VERSION" >/dev/null 2>&1; then
+            gh release create "v$VERSION" --title "v$VERSION" --generate-notes
+          fi
