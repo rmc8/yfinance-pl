@@ -9,9 +9,7 @@ from yfinance_pl._yfinance_pl import Ticker as _RustTicker
 
 # Type aliases for IDE autocompletion
 Period = Literal["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
-Interval = Literal[
-    "1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "1d", "5d", "1wk", "1mo", "3mo"
-]
+Interval = Literal["1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "1d", "5d", "1wk", "1mo", "3mo"]
 
 # Date format type alias
 DateStr = Annotated[str, "Date string in YYYY-MM-DD format"]
@@ -69,6 +67,7 @@ class EarningsInfo(TypedDict):
     yearly_count: int
     quarterly_count: int
     quarterly_eps_count: int
+
 
 # Named tuple for option chain (yfinance-compatible)
 OptionChain = namedtuple("OptionChain", ["calls", "puts"])
@@ -155,4 +154,4 @@ __all__ = [
     "CalendarInfo",
     "EarningsInfo",
 ]
-__version__ = "0.7.2.2"
+__version__ = "0.9.1"

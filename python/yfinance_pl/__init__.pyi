@@ -6,11 +6,8 @@ import polars as pl
 
 # Type aliases
 Period = Literal["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]
-Interval = Literal[
-    "1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "1d", "5d", "1wk", "1mo", "3mo"
-]
+Interval = Literal["1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "1d", "5d", "1wk", "1mo", "3mo"]
 DateStr = Annotated[str, "Date string in YYYY-MM-DD format"]
-
 
 class TickerInfo(TypedDict, total=False):
     """Ticker information dictionary."""
@@ -36,7 +33,6 @@ class TickerInfo(TypedDict, total=False):
     fiftyTwoWeekLow: str
     fiftyTwoWeekHigh: str
 
-
 class FastInfo(TypedDict, total=False):
     """Fast ticker information dictionary."""
 
@@ -46,7 +42,6 @@ class FastInfo(TypedDict, total=False):
     currency: str
     volume: int
 
-
 class CalendarInfo(TypedDict, total=False):
     """Calendar events dictionary."""
 
@@ -54,7 +49,6 @@ class CalendarInfo(TypedDict, total=False):
     earningsDates: list[str]
     exDividendDate: str
     dividendDate: str
-
 
 class EarningsInfo(TypedDict):
     """Earnings data dictionary."""
@@ -64,13 +58,11 @@ class EarningsInfo(TypedDict):
     quarterly_count: int
     quarterly_eps_count: int
 
-
 class OptionChain(NamedTuple):
     """Option chain data."""
 
     calls: pl.DataFrame
     puts: pl.DataFrame
-
 
 class Ticker:
     """Ticker class for fetching stock data (yfinance-compatible API)."""
@@ -215,7 +207,6 @@ class Ticker:
     def get_isin(self) -> str | None:
         """Get the ISIN for this ticker."""
         ...
-
 
 __all__ = [
     "Ticker",

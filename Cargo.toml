@@ -1,6 +1,6 @@
 [package]
 name = "yfinance-pl"
-version = "0.7.2"
+version = "0.9.1"
 edition = "2024"
 
 [lib]
@@ -8,10 +8,11 @@ name = "yfinance_pl"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.25", features = ["extension-module"] }
-yfinance-rs = { git = "https://github.com/gramistella/yfinance-rs", rev = "5b4c555369278466875ad160348f7dce2806d410", features = ["dataframe"] }
-paft = { git = "https://github.com/paft-rs/paft", rev = "87b7e5a509db3c546ff83c2da46a62d35c0c3865", features = ["dataframe"] }
+pyo3 = { version = "0.27", features = ["extension-module"] }
+yfinance-rs = { version = "0.9.1", features = ["dataframe"] }
+paft = { version = "0.9.0", features = ["dataframe"] }
 tokio = { version = "1", features = ["rt-multi-thread"] }
-polars = { version = "0.51", default-features = false, features = ["lazy", "temporal"] }
-pyo3-polars = "0.24"
+polars = { version = "0.53", default-features = false, features = ["lazy", "temporal"] }
+pyo3-polars = "0.26"
 chrono = "0.4"
+rust_decimal = "1.36"

@@ -1,6 +1,6 @@
 [project]
 name = "yfinance-pl"
-version = "0.7.2.2"
+version = "0.9.1"
 description = "Python wrapper for yfinance-rs using PyO3 and Polars"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -69,4 +69,12 @@ target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
+
+[tool.pyrefly]
+search-path = ["python"]
+
+[tool.pyright]
+extraPaths = ["python"]
+include = ["python", "examples"]
+
 

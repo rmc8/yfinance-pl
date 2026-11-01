@@ -28,18 +28,6 @@ pip install yfinance-pl
 
 ### 소스에서 빌드
 
-protobuf 컴파일러가 필요합니다:
-
-```bash
-# macOS
-brew install protobuf
-
-# Ubuntu/Debian
-sudo apt install protobuf-compiler
-```
-
-빌드:
-
 ```bash
 git clone https://github.com/rmc8/yfinance-pl.git
 cd yfinance-pl
@@ -63,7 +51,7 @@ print(history)
 
 | 메서드/속성 | 반환 타입 | 설명 |
 |----------------|-------------|-------------|
-| `history(period, interval, start, end)` | `pl.DataFrame` | 과거 가격 데이터 (`date` 열은 Datetime 타입) |
+| `history(period, interval, start, end)` | `pl.DataFrame` | 과거 가격 데이터 (`Date` 열은 Datetime 타입) |
 
 **`history()` 매개변수:**
 - `period`: 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max
